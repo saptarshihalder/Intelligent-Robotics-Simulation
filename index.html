@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sheep-Dog Shepherding Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .demo-section {
+            margin-bottom: 50px;
+        }
+
+        .demo-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .canvas-container {
+            background: #f8f9fa;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .info-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info-card p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+
+        .code-section {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+
+        .code-section h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .code-section pre {
+            background: #34495e;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐕 Sheep-Dog Shepherding Simulation 🐑</h1>
+            <p>Interactive demonstration of flocking behavior and shepherding dynamics</p>
+        </header>
+
+        <div class="content">
+            <!-- Main Simulation -->
+            <div class="demo-section">
+                <h2>Live Simulation</h2>
+                <div class="canvas-container">
+                    <canvas id="mainCanvas" width="800" height="600"></canvas>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="sheepCount">20</div>
+                            <div class="stat-label">Sheep</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="frameCount">0</div>
+                            <div class="stat-label">Frames</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avgDistance">-</div>
+                            <div class="stat-label">Avg Distance to Target</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button class="btn-primary" id="startBtn">Start</button>
+                        <button class="btn-secondary" id="pauseBtn">Pause</button>
+                        <button class="btn-secondary" id="resetBtn">Reset</button>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-icon" style="background: white;"></div>
+                            <span>Sheep</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-icon" style="background: #8B4513;"></div>
+                            <span>Dog</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-icon" style="background: #4CAF50;"></div>
+                            <span>Target</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Cards -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🐑 Flocking Behavior</h3>
+                    <p><strong>Cohesion:</strong> Sheep move towards the average position of nearby neighbors.</p>
+                    <p><strong>Separation:</strong> Sheep avoid getting too close to each other.</p>
+                    <p><strong>Alignment:</strong> Sheep match velocity with nearby flock members.</p>
+                </div>
+                <div class="info-card">
+                    <h3>🐕 Dog Strategy</h3>
+                    <p>The dog uses a shepherding algorithm to herd sheep towards the target by:</p>
+                    <p>• Finding the furthest sheep from target</p>
+                    <p>• Positioning behind that sheep</p>
+                    <p>• Driving the flock forward</p>
+                </div>
+                <div class="info-card">
+                    <h3>⚙️ Simulation Parameters</h3>
+                    <p><strong>Repulsion Radius:</strong> 50px</p>
+                    <p><strong>Attraction Radius:</strong> 100px</p>
+                    <p><strong>Dog Speed:</strong> 5 units/frame</p>
+                    <p><strong>Sheep Speed:</strong> 3 units/frame</p>
+                </div>
+            </div>
+
+            <!-- Python Code Section -->
+            <div class="code-section">
+                <h3>📝 Complete Python Implementation</h3>
+                <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.patches import Circle
+
+class Sheep:
+    """Individual sheep agent with flocking behavior"""
+    def __init__(self, x, y):
+        self.pos = np.array([x, y], dtype=float)
+        self.vel = np.random.randn(2) * 0.5
+        self.radius = 0.3
+        
+    def update(self, sheep_list, dog, target, params, bounds):
+        """Update sheep position based on flocking rules and dog repulsion"""
+        cohesion = np.zeros(2)
+        separation = np.zeros(2)
+        neighbor_count = 0
+        
+        # Flocking behavior with other sheep
+        for other in sheep_list:
+            if other is self:
+                continue
+                
+            diff = other.pos - self.pos
+            dist = np.linalg.norm(diff)
+            
+            # Cohesion: move towards average position of neighbors
+            if dist < params['attraction_radius']:
+                cohesion += other.pos
+                neighbor_count += 1
+            
+            # Separation: avoid crowding
+            if 0 < dist < params['repulsion_radius']:
+                separation -= diff / dist
+        
+        # Apply cohesion
+        if neighbor_count > 0:
+            cohesion = cohesion / neighbor_count - self.pos
+            self.vel += cohesion * params['cohesion_weight']
+        
+        # Apply separation
+        self.vel += separation * params['separation_weight']
+        
+        # Dog repulsion - flee from dog
+        dog_diff = self.pos - dog.pos
+        dog_dist = np.linalg.norm(dog_diff)
+        
+        if dog_dist < params['dog_influence_radius'] and dog_dist > 0:
+            repulsion_strength = params['dog_repulsion_weight'] * \
+                                (1 - dog_dist / params['dog_influence_radius'])
+            self.vel += (dog_diff / dog_dist) * repulsion_strength
+        
+        # Limit speed
+        speed = np.linalg.norm(self.vel)
+        if speed > params['sheep_max_speed']:
+            self.vel = (self.vel / speed) * params['sheep_max_speed']
+        
+        # Update position
+        self.pos += self.vel
+        
+        # Boundary conditions - bounce off walls
+        for i in range(2):
+            if self.pos[i] < bounds[i][0]:
+                self.pos[i] = bounds[i][0]
+                self.vel[i] *= -0.5
+            elif self.pos[i] > bounds[i][1]:
+                self.pos[i] = bounds[i][1]
+                self.vel[i] *= -0.5
+
+
+class Dog:
+    """Herding dog agent that drives sheep towards target"""
+    def __init__(self, x, y):
+        self.pos = np.array([x, y], dtype=float)
+        self.vel = np.zeros(2)
+        self.radius = 0.4
+        
+    def update(self, sheep_list, target, params):
+        """Update dog position using shepherding strategy"""
+        if not sheep_list:
+            return
+        
+        # Calculate center of mass of sheep
+        sheep_center = np.mean([sheep.pos for sheep in sheep_list], axis=0)
+        
+        # Find furthest sheep from target
+        furthest_sheep = max(sheep_list, 
+                            key=lambda s: np.linalg.norm(s.pos - target))
+        
+        # Strategy: position behind the furthest sheep relative to target
+        to_target = target - furthest_sheep.pos
+        target_dist = np.linalg.norm(to_target)
+        
+        if target_dist > 0.1:
+            # Position dog behind the furthest sheep
+            behind_pos = furthest_sheep.pos - (to_target / target_dist) * 2.0
+            
+            # Move towards optimal position
+            desired_vel = behind_pos - self.pos
+            dist = np.linalg.norm(desired_vel)
+            
+            if dist > 0:
+                desired_vel = (desired_vel / dist) * params['dog_max_speed']
+                self.vel = desired_vel
+        else:
+            # If sheep are at target, move to center
+            desired_vel = sheep_center - self.pos
+            dist = np.linalg.norm(desired_vel)
+            if dist > 0:
+                self.vel = (desired_vel / dist) * params['dog_max_speed'] * 0.5
+        
+        # Update position
+        self.pos += self.vel
+
+
+class ShepherdingSimulation:
+    """Main simulation class"""
+    def __init__(self, num_sheep=20, bounds=((-10, 10), (-10, 10))):
+        self.bounds = bounds
+        
+        # Simulation parameters
+        self.params = {
+            'repulsion_radius': 1.5,
+            'attraction_radius': 3.0,
+            'dog_influence_radius': 4.0,
+            'cohesion_weight': 0.03,
+            'separation_weight': 0.15,
+            'dog_repulsion_weight': 0.8,
+            'sheep_max_speed': 0.3,
+            'dog_max_speed': 0.5
+        }
+        
+        # Initialize sheep randomly in one area
+        self.sheep = [
+            Sheep(
+                np.random.uniform(-8, -4),
+                np.random.uniform(-8, 8)
+            ) for _ in range(num_sheep)
+        ]
+        
+        # Initialize dog on opposite side
+        self.dog = Dog(8, 0)
+        
+        # Target location (where we want to herd sheep)
+        self.target = np.array([8.0, 0.0])
+        
+    def update(self):
+        """Update one simulation step"""
+        # Update all sheep
+        for sheep in self.sheep:
+            sheep.update(self.sheep, self.dog, self.target, 
+                        self.params, self.bounds)
+        
+        # Update dog
+        self.dog.update(self.sheep, self.target, self.params)
+    
+    def animate(self, frames=500, interval=50):
+        """Create animation of the simulation"""
+        fig, ax = plt.subplots(figsize=(10, 10))
+        ax.set_xlim(self.bounds[0])
+        ax.set_ylim(self.bounds[1])
+        ax.set_aspect('equal')
+        ax.grid(True, alpha=0.3)
+        ax.set_title('Sheep-Dog Shepherding Simulation', 
+                     fontsize=14, fontweight='bold')
+        
+        # Plot elements
+        sheep_scatter = ax.scatter([], [], c='white', s=200, 
+                                  edgecolors='black', linewidths=2, 
+                                  label='Sheep', zorder=3)
+        dog_scatter = ax.scatter([], [], c='brown', s=300, marker='^', 
+                                edgecolors='black', linewidths=2, 
+                                label='Dog', zorder=4)
+        target_scatter = ax.scatter([self.target[0]], [self.target[1]], 
+                                   c='green', s=500, marker='*', 
+                                   edgecolors='darkgreen', linewidths=2, 
+                                   label='Target', zorder=2, alpha=0.6)
+        
+        # Dog influence radius
+        dog_circle = Circle(self.dog.pos, self.params['dog_influence_radius'], 
+                          fill=False, linestyle='--', color='brown', alpha=0.3)
+        ax.add_patch(dog_circle)
+        
+        time_text = ax.text(0.02, 0.98, '', transform=ax.transAxes, 
+                          verticalalignment='top', fontsize=10,
+                          bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        
+        ax.legend(loc='upper right')
+        
+        def init():
+            sheep_scatter.set_offsets(np.empty((0, 2)))
+            dog_scatter.set_offsets(np.empty((0, 2)))
+            return sheep_scatter, dog_scatter, dog_circle, time_text
+        
+        def animate_frame(frame):
+            self.update()
+            
+            sheep_pos = np.array([sheep.pos for sheep in self.sheep])
+            sheep_scatter.set_offsets(sheep_pos)
+            dog_scatter.set_offsets([self.dog.pos])
+            dog_circle.center = self.dog.pos
+            time_text.set_text(f'Time: {frame}')
+            
+            return sheep_scatter, dog_scatter, dog_circle, time_text
+        
+        anim = animation.FuncAnimation(fig, animate_frame, init_func=init,
+                                      frames=frames, interval=interval, 
+                                      blit=True, repeat=True)
+        
+        plt.tight_layout()
+        return anim
+
+
+# Run simulation
+if __name__ == "__main__":
+    print("Starting Sheep-Dog Shepherding Simulation...")
+    sim = ShepherdingSimulation(num_sheep=20)
+    anim = sim.animate(frames=500, interval=50)
+    plt.show()</code></pre>
+            </div>
+        </div>
+
+        <footer>
+            <p>Sheep-Dog Shepherding Simulation © 2024</p>
+            <p>Based on flocking algorithms and swarm intelligence</p>
+            <p><a href="https://github.com" target="_blank">View on GitHub</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let animationId = null;
+        let isRunning = false;
+        let frameCount = 0;
+        
+        // Simulation parameters
+        const params = {
+            repulsionRadius: 50,
+            attractionRadius: 100,
+            dogInfluenceRadius: 120,
+            cohesionWeight: 0.03,
+            separationWeight: 0.15,
+            dogRepulsionWeight: 0.8,
+            sheepMaxSpeed: 3,
+            dogMaxSpeed: 5
+        };
+        
+        class Vec2 {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+            
+            add(v) { return new Vec2(this.x + v.x, this.y + v.y); }
+            sub(v) { return new Vec2(this.x - v.x, this.y - v.y); }
+            mul(s) { return new Vec2(this.x * s, this.y * s); }
+            div(s) { return new Vec2(this.x / s, this.y / s); }
+            mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+            normalize() {
+                const m = this.mag();
+                return m > 0 ? this.div(m) : new Vec2(0, 0);
+            }
+            limit(max) {
+                const m = this.mag();
+                return m > max ? this.normalize().mul(max) : this;
+            }
+        }
+        
+        class Sheep {
+            constructor(x, y) {
+                this.pos = new Vec2(x, y);
+                this.vel = new Vec2((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2);
+                this.radius = 8;
+            }
+            
+            update(sheep, dog, target) {
+                let cohesion = new Vec2(0, 0);
+                let separation = new Vec2(0, 0);
+                let neighborCount = 0;
+                
+                // Flocking behavior
+                sheep.forEach(other => {
+                    if (other === this) return;
+                    
+                    const diff = other.pos.sub(this.pos);
+                    const dist = diff.mag();
+                    
+                    // Cohesion
+                    if (dist < params.attractionRadius) {
+                        cohesion = cohesion.add(other.pos);
+                        neighborCount++;
+                    }
+                    
+                    // Separation
+                    if (dist < params.repulsionRadius && dist > 0) {
+                        separation = separation.sub(diff.normalize());
+                    }
+                });
+                
+                // Apply cohesion
+                if (neighborCount > 0) {
+                    cohesion = cohesion.div(neighborCount).sub(this.pos);
+                    this.vel = this.vel.add(cohesion.mul(params.cohesionWeight));
+                }
+                
+                // Apply separation
+                this.vel = this.vel.add(separation.mul(params.separationWeight));
+                
+                // Dog repulsion
+                const dogDiff = this.pos.sub(dog.pos);
+                const dogDist = dogDiff.mag();
+                
+                if (dogDist < params.dogInfluenceRadius && dogDist > 0) {
+                    const repulsionForce = params.dogRepulsionWeight * 
+                                          (1 - dogDist / params.dogInfluenceRadius);
+                    this.vel = this.vel.add(dogDiff.normalize().mul(repulsionForce));
+                }
+                
+                // Limit speed
+                this.vel = this.vel.limit(params.sheepMaxSpeed);
+                
+                // Update position
+                this.pos = this.pos.add(this.vel);
+                
+                // Boundary conditions
+                if (this.pos.x < 20) { this.pos.x = 20; this.vel.x *= -0.5; }
+                if (this.pos.x > canvas.width - 20) { this.pos.x = canvas.width - 20; this.vel.x *= -0.5; }
+                if (this.pos.y < 20) { this.pos.y = 20; this.vel.y *= -0.5; }
+                if (this.pos.y > canvas.height - 20) { this.pos.y = canvas.height - 20; this.vel.y *= -0.5; }
+            }
+            
+            draw() {
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+        
+        class Dog {
+            constructor(x, y) {
+                this.pos = new Vec2(x, y);
+                this.vel = new Vec2(0, 0);
+                this.radius = 10;
+            }
+            
+            update(sheep, target) {
+                if (sheep.length === 0) return;
+                
+                // Find furthest sheep from target
+                let furthestSheep = sheep[0];
+                let maxDist = target.sub(furthestSheep.pos).mag();
+                
+                sheep.forEach(s => {
+                    const dist = target.sub(s.pos).mag();
+                    if (dist > maxDist) {
+                        maxDist = dist;
+                        furthestSheep = s;
+                    }
+                });
+                
+                // Position behind furthest sheep
+                const toTarget = target.sub(furthestSheep.pos);
+                const targetDist = toTarget.mag();
+                
+                if (targetDist > 10) {
+                    const behindPos = furthestSheep.pos.sub(toTarget.normalize().mul(80));
+                    const desired = behindPos.sub(this.pos);
+                    this.vel = desired.normalize().mul(params.dogMaxSpeed);
+                } else {
+                    // Move to center of flock
+                    let center = new Vec2(0, 0);
+                    sheep.forEach(s => { center = center.add(s.pos); });
+                    center = center.div(sheep.length);
+                    
+                    const desired = center.sub(this.pos);
+                    this.vel = desired.normalize().mul(params.dogMaxSpeed * 0.5);
+                }
+                
+                this.pos = this.pos.add(this.vel);
+            }
+            
+            draw() {
+                // Draw influence circle
+                ctx.strokeStyle = 'rgba(139, 69, 19, 0.2)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(this.pos.x, this.pos.y, params.dogInfluenceRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw dog as triangle
+                ctx.fillStyle = '#8B4513';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const angle = Math.atan2(this.vel.y, this.vel.x);
+                ctx.moveTo(
+                    this.pos.x + Math.cos(angle) * this.radius * 1.5,
+                    this.pos.y + Math.sin(angle) * this.radius * 1.5
+                );
+                ctx.lineTo(
+                    this.pos.x + Math.cos(angle + 2.5) * this.radius,
+                    this.pos.y + Math.sin(angle + 2.5) * this.radius
+                );
+                ctx.lineTo(
+                    this.pos.x + Math.cos(angle - 2.5) * this.radius,
+                    this.pos.y + Math.sin(angle - 2.5) * this.radius
+                );
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+        
+        // Initialize simulation
+        let sheep = [];
+        let dog = new Dog(canvas.width - 100, canvas.height / 2);
+        const target = new Vec2(canvas.width - 100, canvas.height / 2);
+        
+        function initSimulation() {
+            sheep = [];
+            for (let i = 0; i < 20; i++) {
+                sheep.push(new Sheep(
+                    100 + Math.random() * 200,
+                    100 + Math.random() * 400
+                ));
+            }
+            dog = new Dog(canvas.width - 100, canvas.height / 2);
+            frameCount = 0;
+        }
+        
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw target
+            ctx.fillStyle = '#4CAF50';
+            ctx.strokeStyle = '#2E7D32';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(target.x, target.y - 15);
+            ctx.lineTo(target.x - 12, target.y + 10);
+            ctx.lineTo(target.x + 12, target.y + 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw entities
+            dog.draw();
+            sheep.forEach(s => s.draw());
+            
+            // Update stats
+            let totalDist = 0;
+            sheep.forEach(s => {
+                totalDist += target.sub(s.pos).mag();
+            });
+            const avgDist = (totalDist / sheep.length).toFixed(1);
+            document.getElementById('avgDistance').textContent = avgDist;
+            document.getElementById('frameCount').textContent = frameCount;
+        }
+        
+        function update() {
+            if (!isRunning) return;
+            
+            frameCount++;
+            
+            // Update all entities
+            sheep.forEach(s => s.update(sheep, dog, target));
+            dog.update(sheep, target);
+            
+            draw();
+            animationId = requestAnimationFrame(update);
+        }
+        
+        // Event listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            isRunning = true;
+            update();
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            isRunning = false;
+            if (animationId) cancelAnimationFrame(animationId);
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isRunning = false;
+            if (animationId) cancelAnimationFrame(animationId);
+            initSimulation();
+            draw();
+        });
+        
+        // Initialize and draw
+        initSimulation();
+        draw();
+    </script>
+</body>
+</html>
